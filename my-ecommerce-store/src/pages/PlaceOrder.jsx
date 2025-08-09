@@ -1,129 +1,112 @@
-import React, { useContext, useEffect, useState } from 'react';
-import Title from '../components/Title';
+import React, { useContext, useState } from 'react'
+import Title from '../components/Title'; // adjust the path if needed
 import CartTotal from '../components/CartTotal';
 import { assets } from '../assets/assets';
 import { ShopContext } from '../context/ShopContext';
-import { useNavigate } from 'react-router-dom';
 
-const PlaceOrder = () => {
-  const { cartItems, products } = useContext(ShopContext);
-  const [method, setMethod] = useState('cod');
-  const [cartData, setCartData] = useState([]);
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    const tempData = [];
-    for (const productId in cartItems) {
-      for (const size in cartItems[productId]) {
-        if (cartItems[productId][size] > 0) {
-          tempData.push({
-            _id: productId,
-            size: size,
-            quantity: cartItems[productId][size],
-          });
+const placeOrder = () => {
+
+  const [method,setMethod] = useState('cod');
+  const {navigate,backendUrl,token,cartItems,SetCartItems,getCartAmount,delivery_fee,products} = useContext(ShopContext);
+  const [formData, setFormData] = useState({
+  firstName: '',
+  lastName: '',
+  email: '',
+  street: '',
+  city: '',
+  state: '',
+  zipcode: '',
+  country: '',
+  phone: '',
+});
+
+  const onChangeHandler = (e) => {
+    const name = e.target.name;
+    const value = e.target.value;
+    setFormData(data => ({...data, [name]: value }))
+  }
+
+  const onSubmitHandler = async (event) => {
+    event.preventDefault();
+   try {
+      let orderItems = [];
+      for (const items in cartItems) {
+        for (const item in cartItems[items]) {
+          if (cartItems[items][item] > 0) {
+            const itemInfo = structuredClone(
+              products.find(product => product._id === items)
+            );
+            if (itemInfo) {
+              itemInfo.size = item;
+              itemInfo.quantity = cartItems[items][item];
+              orderItems.push(itemInfo);
+            }
+          }
         }
       }
+
+      console.log("Order items:", orderItems);
+      console.log("Form data:", formData);
+      console.log("Payment method:", method);
+
+    } catch (error) {
+      console.error("Error placing order:", error);
     }
-    setCartData(tempData);
-  }, [cartItems]);
 
+  }
+
+  
   return (
-    <div className="flex flex-col lg:flex-row justify-between gap-6 pt-5 sm:pt-14 min-h-[60vh] border-t-2 px-4 sm:px-10">
-      {/* LEFT: Delivery Info + Order Summary */}
-      <div className="w-full lg:max-w-[55%] flex flex-col gap-8">
-        {/* Delivery Information */}
-        <div className="bg-white border p-5 rounded-lg shadow-sm">
-          <Title text1="DELIVERY" text2="INFORMATION" />
-          <form className="grid sm:grid-cols-2 gap-4 mt-4">
-            <input type="text" required placeholder="First Name" className="border p-3 text-sm rounded-md focus:ring-2 focus:ring-black/30 placeholder:text-gray-400" />
-            <input type="text" required placeholder="Last Name" className="border p-3 text-sm rounded-md focus:ring-2 focus:ring-black/30 placeholder:text-gray-400" />
-            <input type="email" required placeholder="Email Address" className="sm:col-span-2 border p-3 text-sm rounded-md focus:ring-2 focus:ring-black/30 placeholder:text-gray-400" />
-            <input type="text" required placeholder="Street Address" className="sm:col-span-2 border p-3 text-sm rounded-md focus:ring-2 focus:ring-black/30 placeholder:text-gray-400" />
-            <input type="text" placeholder="City" className="border p-3 text-sm rounded-md focus:ring-2 focus:ring-black/30 placeholder:text-gray-400" />
-            <input type="text" placeholder="State" className="border p-3 text-sm rounded-md focus:ring-2 focus:ring-black/30 placeholder:text-gray-400" />
-            <input type="number" placeholder="Zip Code" className="border p-3 text-sm rounded-md focus:ring-2 focus:ring-black/30 placeholder:text-gray-400" />
-            <input type="text" placeholder="Country" className="border p-3 text-sm rounded-md focus:ring-2 focus:ring-black/30 placeholder:text-gray-400" />
-            <input type="tel" placeholder="Phone Number" className="sm:col-span-2 border p-3 text-sm rounded-md focus:ring-2 focus:ring-black/30 placeholder:text-gray-400" />
-            <textarea placeholder="Delivery Notes (optional)" className="sm:col-span-2 border p-3 text-sm rounded-md focus:ring-2 focus:ring-black/30 placeholder:text-gray-400 resize-none" rows={3} />
-          </form>
-        </div>
+    <form onSubmit={onSubmitHandler}  className='flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[60vh] border-t-2'>
+      <div className='fle flex-col w-full sm:max-w-[380px]'>
 
-        {/* Order Summary */}
-        <div className="bg-white border p-5 rounded-lg shadow-sm">
-          <Title text1="ORDER" text2="SUMMARY" />
-          <div className="space-y-4 mt-4">
-            {cartData.map((item, index) => {
-              const product = products.find(p => p._id === item._id);
-              if (!product) return null;
-
-              return (
-                <div key={index} className="flex items-center justify-between border p-3 rounded-lg shadow-sm">
-                  <div className="flex items-center gap-4">
-                    <img className="w-14 h-14 object-cover rounded" src={product.image[0]} alt={product.name} />
-                    <div>
-                      <p className="text-sm font-medium">{product.name}</p>
-                      <p className="text-xs text-gray-500">Size: {item.size}</p>
-                      <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
-                    </div>
-                  </div>
-                  <p className="text-sm font-semibold text-gray-800">
-                    ₦{(product.price * item.quantity).toLocaleString()}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
+        <div className='text-xl sm:text-2xl my-3'>
+          <Title text1={'DELIVERY'} text2={'INFORMATION'}/>
         </div>
+        <div className='flex gap-3'>
+            <input required onChange={onChangeHandler} name='firstName'value={formData.firstName} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='First Name' />
+            <input required onChange={onChangeHandler} name='lastName'value={formData.lastName} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Last name' />
+        </div>
+            <input required onChange={onChangeHandler} name='email'value={formData.email} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="email" placeholder='Email Address' />
+            <input required onChange={onChangeHandler} name='street'value={formData.street} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Street Name' />
+            <div className='flex gap-3'>
+            <input required onChange={onChangeHandler} name='city'value={formData.city} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='City' />
+            <input required onChange={onChangeHandler} name='state'value={formData.state}  className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='State' />
+        </div>
+            <div className='flex gap-3'>
+            <input required onChange={onChangeHandler} name='zipcode'value={formData.zipcode} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="number" placeholder='Zip code' />
+            <input required onChange={onChangeHandler} name='country'value={formData.country} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Country' />
+        </div>
+        <input required onChange={onChangeHandler} name='phone'value={formData.phone} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="number" placeholder='Phone Number' />
       </div>
 
-      {/* RIGHT: Payment Method & Total */}
-      <div className="w-full lg:w-[40%] space-y-8">
-        <CartTotal />
-
-        <div className="bg-white border p-5 rounded-lg shadow-sm">
-          <Title text1="PAYMENT" text2="METHOD" />
-          <div className="flex flex-col gap-3 mt-4">
-            {/* Stripe Option */}
-            <div
-              onClick={() => setMethod('stripe')}
-              className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer hover:bg-gray-50 ${method === 'stripe' ? 'bg-gray-100' : ''}`}
-            >
-              <span className={`w-4 h-4 border rounded-full ${method === 'stripe' ? 'bg-green-500' : ''}`} />
-              <img className="h-5" src={assets.stripe_logo} alt="stripe" />
+      <div className='mt-8'>
+          <CartTotal/>
+      </div>
+      <div className='mt-12'>
+        <Title text1={'PAYMENT'} text2={'METHOD'}/>
+        {/*-------payment method------*/}
+        <div className='flex gap-3 flex-col lg:flex-row'>
+            <div onClick={()=>setMethod('stripe')}className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
+              <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'stripe' ? 'bg-green-400' : ''}`}></p>
+              <img className='h-5 mx-4' src={assets.stripe_logo} alt="" />
             </div>
-
-            {/* Razorpay Option */}
-            <div
-              onClick={() => setMethod('razorpay')}
-              className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer hover:bg-gray-50 ${method === 'razorpay' ? 'bg-gray-100' : ''}`}
-            >
-              <span className={`w-4 h-4 border rounded-full ${method === 'razorpay' ? 'bg-green-500' : ''}`} />
-              <img className="h-5" src={assets.razorpay_logo} alt="razorpay" />
+             <div onClick={()=>setMethod('razorpay')}className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
+              <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'razorpay' ? 'bg-green-400' : ''}`}></p>
+              <img className='h-5 mx-4' src={assets.razorpay_logo} alt="" />
             </div>
-
-            {/* Cash on Delivery Option */}
-            <div
-              onClick={() => setMethod('cod')}
-              className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer hover:bg-gray-50 ${method === 'cod' ? 'bg-gray-100' : ''}`}
-            >
-              <span className={`w-4 h-4 border rounded-full ${method === 'cod' ? 'bg-green-500' : ''}`} />
-              <span className="text-sm font-medium">Cash on Delivery</span>
+             <div onClick={()=>setMethod('cod')}className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
+              <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'cod' ? 'bg-green-400' : ''}`}></p>
+              <p className='text-gray-500 text-sm font-medium mx-4'>CASH ON DELIVERY</p>
             </div>
-          </div>
         </div>
-
-        {/* Place Order Button */}
-        <div className="text-end">
-          <button
-            onClick={() => navigate('/orders')}
-            className="bg-black text-white px-8 py-3 text-sm rounded-lg shadow hover:bg-gray-900 transition"
-          >
-            PLACE ORDER
-          </button>
+        <div className='w-full text-end mt-8'>
+          <button type='submit' className='bg-black text-white px-16 py-3 text-sm'>PLACE ORDER</button>
         </div>
       </div>
-    </div>
-  );
-};
+    </form>
+  )
+}
 
-export default PlaceOrder;
+export default placeOrder

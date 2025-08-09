@@ -10,7 +10,6 @@ const ShopContextProvider = (props) => {
   const currency = "$";
   const delivery_fee = 10;
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
-
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [cartItems, setCartItems] = useState({});
@@ -48,7 +47,7 @@ const ShopContextProvider = (props) => {
   if (!authToken) return; // Skip if user isn't logged in yet
 
   try {
-    const res = await axios.get(`${backendUrl}/api/order/user`, {
+    const res = await axios.post(`${backendUrl}/api/order/userOrders`, {}, {
       headers: { token: authToken },
     });
 
