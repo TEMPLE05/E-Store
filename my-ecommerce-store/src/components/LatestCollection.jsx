@@ -8,8 +8,11 @@ const LatestCollection = () => {
   const [latestProducts, setLatestProducts] = useState([]);
 
   useEffect(() => {
+  if (Array.isArray(products)) {
     setLatestProducts(products.slice(0, 10));
-  }, [products]);
+  }
+}, [products]);
+
 
   return (
     <div className="w-full py-16 px-4 md:px-10 lg:px-20">

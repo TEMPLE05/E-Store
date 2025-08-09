@@ -11,6 +11,11 @@ a.active hr {
   font-family: outfit;
 }
 
+select,input,textarea{
+  border: 1px solid #c2c2c2;
+  outline-color: black;
+  border-radius: 4px
+}
 .prata-regular {
   font-family: "Prata", serif;
   font-weight: 400;
@@ -24,4 +29,8 @@ a.active hr {
     background-color: black;
     color: white;
   }
+}
+.active{
+  background-color: aliceblue;
+  border-color: darkblue;
 }

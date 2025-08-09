@@ -4,7 +4,8 @@ import 'dotenv/config'
 import connectDB from './config/mongodb.js'
 import connectCloudinary from './config/cloudinary.js'
 import userRouter from './routes/userRoute.js'
-import productRouter from './routes/productsRoute.js'
+import productsRouter from './routes/productsRoute.js'
+import cartRouter from './routes/cartRoute.js'
 
 //App Config
 const app= express()
@@ -18,7 +19,8 @@ app.use(cors())
 
 //Api Endpoints
 app.use('/api/user',userRouter)
-app.use('/api/products',productRouter)
+app.use('/api/products',productsRouter)
+app.use('/api/cart',cartRouter)
 
 app.get('/',(req,res)=>(
     res.send("API Working")

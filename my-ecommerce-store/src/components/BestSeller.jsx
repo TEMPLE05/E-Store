@@ -1,17 +1,21 @@
 import { useContext, useEffect, useState } from 'react';
 import { ShopContext } from '../context/ShopContext';
 import Title from './Title';
-import { products } from '../assets/assets';
 import ProductItem from './ProductItem';
 
 const BestSeller = () => {
-  const { Products } = useContext(ShopContext);
-  const [BestSeller, setBestSeller] = useState([]);
+  const { products } = useContext(ShopContext); 
+  const [bestSeller, setBestSeller] = useState([]);
 
-  useEffect(() => {
+ useEffect(() => {
+    if (!Array.isArray(products)) return;
+
     const bestproduct = products.filter((item) => item.bestseller);
     setBestSeller(bestproduct.slice(0, 3));
-  }, []);
+  }, [products]);
+
+ console.log("Best sellers:", bestSeller);
+
 
   return (
     <div className='my-10 px-4 sm:px-6 lg:px-8'>
@@ -26,10 +30,10 @@ const BestSeller = () => {
       {/* Centered Grid */}
       <div className='flex justify-center'>
         <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6'>
-          {BestSeller.map((item, index) => (
+          {bestSeller.map((item, index) => (
             <ProductItem
               key={index}
-              id={item.id}
+              id={item._id}
               name={item.name}
               price={item.price}
               image={item.image}
