@@ -186,6 +186,7 @@ const ShopContextProvider = (props) => {
     backendUrl,
     setToken,
     token,
+    setCartItems,
     // optional helpers you might want to call from components:
     getProductData,
     getUserCart,

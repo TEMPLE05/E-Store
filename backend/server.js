@@ -15,8 +15,8 @@ connectDB()
 connectCloudinary()
 
 //MiddleWares
-app.use(express.json())
-app.use(cors())
+app.use(express.json());
+app.use(cors());
 
 //Api Endpoints
 app.use('/api/user',userRouter)
