@@ -11,12 +11,20 @@ import orderRouter from './routes/orderRoute.js'
 //App Config
 const app= express()
 const port = process.env.PORT || 4000
+const allowedOrigins = [
+    "http://localhost:5173", // for local dev
+    "https://e-store-29sw-git-main-otemple712-5983s-projects.vercel.app" // your Vercel frontend
+    // Add your custom domain here later
+];
 connectDB()
 connectCloudinary()
 
 //MiddleWares
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: allowedOrigins,
+    credentials: true
+}));
 
 //Api Endpoints
 app.use('/api/user',userRouter)
