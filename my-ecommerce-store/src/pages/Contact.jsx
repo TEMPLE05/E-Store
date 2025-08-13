@@ -66,18 +66,6 @@ const Contact = () => {
           </form>
         </div>
       </div>
-
-      {/* Google Map */}
-      <div className="mt-16 rounded-lg overflow-hidden shadow-lg">
-        <iframe
-          title="Google Map"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3941.9519296562127!2d7.492727475052384!3d9.056605689102712!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x104e0a4eab308a17%3A0x7f86a7cb39b9d80c!2sTranscorp%20Hilton%20Abuja!5e0!3m2!1sen!2sng!4v1721243917169!5m2!1sen!2sng"
-          width="100%"
-          height="320"
-          allowFullScreen=""
-          loading="lazy"
-        ></iframe>
-      </div>
     </div>
   );
 };
