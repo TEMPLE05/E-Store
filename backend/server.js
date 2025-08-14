@@ -12,6 +12,7 @@ import orderRouter from './routes/orderRoute.js'
 const app= express()
 const port = process.env.PORT || 4000
 const allowedOrigins = [
+    "http://localhost:5174",
     "http://localhost:5173", // for local dev
     "https://e-store-29sw-git-main-otemple712-5983s-projects.vercel.app" // your Vercel frontend
     // Add your custom domain here later
