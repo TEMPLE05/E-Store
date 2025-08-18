@@ -41,12 +41,6 @@ const App = () => {
               <SideBar />
               <div className='w-[70%] mx-auto ml-[max(5w,25px)] my-8 text-gray-600 text-base'>
                 <Routes>
-                   <Route path='/' element={
-                    <div className="p-8 text-center">
-                      <h1 className="text-2xl font-bold text-gray-800">Welcome to the Admin Dashboard 👋</h1>
-                      <p className="text-gray-600 mt-2">Use the sidebar to navigate between sections.</p>
-                    </div>
-                  } />
                   <Route path='/add' element={<Add token={token} />} />
                   <Route path='/List' element={<List token={token} />} />
                   <Route path='/orders' element={<Orders token={token} />} />
