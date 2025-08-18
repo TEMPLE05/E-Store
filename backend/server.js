@@ -12,10 +12,10 @@ import orderRouter from './routes/orderRoute.js'
 const app= express()
 const port = process.env.PORT || 4000
 const allowedOrigins = [
+    "http://localhost:5173",
     "http://localhost:5174",
-    "http://localhost:5173", // for local dev
-    "https://e-store-29sw-git-main-otemple712-5983s-projects.vercel.app" // your Vercel frontend
-    // Add your custom domain here later
+    "https://e-store-29sw.vercel.app",  // frontend
+    "https://e-store-2pkm.vercel.app"   // admin panel
 ];
 connectDB()
 connectCloudinary()
@@ -23,9 +23,29 @@ connectCloudinary()
 //MiddleWares
 app.use(express.json());
 app.use(cors({
-    origin: allowedOrigins,
-    credentials: true
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+
+    try {
+      const hostname = new URL(origin).hostname;
+
+      if (allowedOrigins.includes(origin) || /\.vercel\.app$/.test(hostname)) {
+        return callback(null, true);
+      }
+    } catch (err) {
+      console.warn("Invalid origin:", origin);
+    }
+
+    return callback(new Error("CORS policy: Origin not allowed"));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "token"],
 }));
+
+// Explicitly handle OPTIONS
+app.options("*", cors());
+
 
 //Api Endpoints
 app.use('/api/user',userRouter)
