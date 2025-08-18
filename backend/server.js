@@ -8,43 +8,44 @@ import productsRouter from './routes/productsRoute.js'
 import cartRouter from './routes/cartRoute.js'
 import orderRouter from './routes/orderRoute.js'
 
-// App Config
-const app = express()
+//App Config
+const app= express()
 const port = process.env.PORT || 4000
-
-// Allowed origins (Frontend + Admin)
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
-  "https://e-store-29sw.vercel.app",  // frontend
-  "https://e-store-2pkm.vercel.app"   // admin panel
-]
-
+  "https://e-store-29sw.vercel.app", // frontend
+  "https://e-store-2pkm.vercel.app"  // admin panel
+];
 connectDB()
 connectCloudinary()
 
-// Middlewares
-app.use(express.json())
+//MiddleWares
+app.use(express.json());
+app.use(cors({
+  origin: (origin, callback) => {
+    console.log("Request Origin:", origin);
 
-// CORS config
-const corsOptions = {
-  origin: allowedOrigins,
+    if (!origin) return callback(null, true); // Postman/server
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    console.warn(`CORS blocked: ${origin}`);
+    return callback(new Error("CORS policy: Origin not allowed"));
+  },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "token"],
-}
+}));
 
-app.use(cors(corsOptions))
-app.options("*", cors(corsOptions)) // Preflight
+//Api Endpoints
+app.use('/api/user',userRouter)
+app.use('/api/products',productsRouter)
+app.use('/api/cart',cartRouter)
+app.use('/api/order',orderRouter)
 
-// API Endpoints
-app.use('/api/user', userRouter)
-app.use('/api/products', productsRouter)
-app.use('/api/cart', cartRouter)
-app.use('/api/order', orderRouter)
+app.get('/',(req,res)=>(
+    res.send("API Working")
+))
 
-app.get('/', (req, res) => {
-  res.send("API Working")
-})
-
-app.listen(port, () => console.log('Server started on port: ' + port))
+app.listen(port, ()=> console.log('Server started on port:'+port))
