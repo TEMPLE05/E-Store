@@ -81,4 +81,51 @@ const getUserCart = async (req, res) => {
   }
 };
 
-export { addToCart, updateCart, getUserCart };
+// Merge guest cart with user cart after login
+const mergeGuestCart = async (req, res) => {
+  try {
+    const { userId, guestCart } = req.body;
+
+    if (!guestCart || Object.keys(guestCart).length === 0) {
+      return res.json({ success: true, message: "No guest cart to merge" });
+    }
+
+    const userData = await userModel.findById(userId);
+    if (!userData) return res.status(404).json({ success: false, message: "User not found" });
+
+    let userCartData = userData.cartData || {};
+
+    // Merge logic: Add guest cart quantities to existing user cart
+    for (const itemId in guestCart) {
+      if (!userCartData[itemId]) {
+        userCartData[itemId] = {};
+      }
+      
+      for (const size in guestCart[itemId]) {
+        const guestQty = guestCart[itemId][size] || 0;
+        if (guestQty > 0) {
+          if (userCartData[itemId][size]) {
+            // Add to existing quantity
+            userCartData[itemId][size] += guestQty;
+          } else {
+            // Set new quantity
+            userCartData[itemId][size] = guestQty;
+          }
+        }
+      }
+    }
+
+    await userModel.findByIdAndUpdate(userId, { cartData: userCartData });
+    res.json({ 
+      success: true, 
+      message: "Guest cart merged successfully", 
+      cartData: userCartData 
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export { addToCart, updateCart, getUserCart, mergeGuestCart };

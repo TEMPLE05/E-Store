@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import Title from '../components/Title';
 import axios from 'axios';
 import CartTotal from '../components/CartTotal';
@@ -7,7 +7,17 @@ import { toast } from 'react-toastify';
 
 const PlaceOrder = () => {
   const [method, setMethod] = useState('cod');
-  const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products } = useContext(ShopContext);
+  const { 
+    navigate, 
+    backendUrl, 
+    token, 
+    cartItems, 
+    setCartItems, 
+    getCartAmount, 
+    delivery_fee, 
+    products,
+    handleGuestCheckout 
+  } = useContext(ShopContext);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -21,6 +31,13 @@ const PlaceOrder = () => {
     phone: '',
   });
 
+  // Check if user is logged in when component mounts
+  useEffect(() => {
+    if (!handleGuestCheckout()) {
+      return; // Will redirect to login
+    }
+  }, []);
+
   const onChangeHandler = (e) => {
     const { name, value } = e.target;
     setFormData((data) => ({ ...data, [name]: value }));
@@ -28,6 +45,14 @@ const PlaceOrder = () => {
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
+    
+    // Double check authentication before placing order
+    if (!token) {
+      toast.error("Please login to place an order");
+      navigate('/login');
+      return;
+    }
+
     try {
       let orderItems = [];
 
@@ -46,17 +71,22 @@ const PlaceOrder = () => {
         }
       }
 
+      if (orderItems.length === 0) {
+        toast.error("Your cart is empty");
+        return;
+      }
+
       const addressString = `${formData.firstName} ${formData.lastName}, ${formData.street}, ${formData.city}, ${formData.state}, ${formData.zipcode}, ${formData.country}, Phone: ${formData.phone}, Email: ${formData.email}`;
 
-       let orderData = {
-            address: addressString,
-            items: orderItems,
-            amount: getCartAmount() + delivery_fee,
-            paymentMethod: method === 'cod' ? 'COD' : 'BANK_TRANSFER'
-        };
+      let orderData = {
+        address: addressString,
+        items: orderItems,
+        amount: getCartAmount() + delivery_fee,
+        paymentMethod: method === 'cod' ? 'COD' : 'BANK_TRANSFER'
+      };
 
-        console.log("=== FRONTEND method state ===", method);
-        console.log("=== FRONTEND orderData ===", JSON.stringify(orderData, null, 2));
+      console.log("=== FRONTEND method state ===", method);
+      console.log("=== FRONTEND orderData ===", JSON.stringify(orderData, null, 2));
 
       const response = await axios.post(
         backendUrl + '/api/order/place',
@@ -68,6 +98,7 @@ const PlaceOrder = () => {
 
       if (response.data.success) {
         setCartItems({});
+        toast.success("Order placed successfully!");
         navigate('/orders');
       } else {
         toast.error(response.data.message);
@@ -78,6 +109,25 @@ const PlaceOrder = () => {
       toast.error("Something went wrong placing your order.");
     }
   };
+
+  // Show loading or redirect message if not authenticated
+  if (!token) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="text-lg font-medium text-gray-600 mb-4">
+            Please login to proceed with checkout
+          </div>
+          <button 
+            onClick={() => navigate('/login')}
+            className="bg-black text-white px-8 py-3 text-sm rounded-lg hover:bg-gray-800 transition"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form
