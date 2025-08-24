@@ -96,6 +96,34 @@ const getProfile = async (req, res) => {
     }
 };
 
+const updateProfile = async (req, res) => {
+    try {
+        const userId = req.userId;
+        const { name, email } = req.body;
+        
+        const updatedUser = await userModel.findByIdAndUpdate(
+            userId, 
+            { name, email }, 
+            { new: true }
+        ).select("-password");
+        
+        res.json({ success: true, user: updatedUser });
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+};
+
+const getUserOrders = async (req, res) => {
+    try {
+        const userId = req.userId;
+        const orders = await orderModel.find({ userId }).sort({ date: -1 });
+        res.json({ success: true, orders });
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+};
+
+
 //Route for admin login
 const adminLogin = async (req, res) => {
     try {
@@ -114,4 +142,4 @@ const adminLogin = async (req, res) => {
     }
 };
 
-export { loginuser, registerUser, adminLogin, getProfile };
+export { loginuser, registerUser, adminLogin, getProfile, updateProfile, getUserOrders };
